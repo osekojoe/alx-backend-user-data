@@ -6,6 +6,7 @@ Authentication handler
 
 from typing import List, TypeVar
 from flask import request
+import fnmatch
 
 User = TypeVar('User')
 
@@ -14,21 +15,19 @@ class Auth:
     '''Authentication handling'''
 
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        '''Get the authorization header from the Flask request.
-        :param request: The Flask request object.
-        :return: The authorization header or None if not found.'''
+        """
+        Check if authentication is required for a given path.
+
+        :param path: The path to check for authentication.
+        :param excluded_paths: List of paths that are excluded from authentication checks.
+        :return: True if authentication is required, False otherwise.
+        """
         if path is None or not excluded_paths:
             return True
 
-        # Ensure that excluded_paths are slash-tolerant
-        if not path.endswith('/'):
-            path += '/'
-
-        # Check if path is in excluded_paths (slash-tolerant)
-        for excluded_path in excluded_paths:
-            if excluded_path.endswith('/'):
-                excluded_path = excluded_path[:-1]
-            if path.startswith(excluded_path):
+        # Check if path is in excluded_paths using fnmatch
+        for pattern in excluded_paths:
+            if fnmatch.fnmatch(path, pattern):
                 return False
 
         return True
