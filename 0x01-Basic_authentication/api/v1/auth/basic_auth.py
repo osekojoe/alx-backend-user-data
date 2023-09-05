@@ -6,6 +6,8 @@ Basic Authentication handler
 
 import base64
 from api.v1.auth.auth import Auth
+from typing import TypeVar
+from models.user import User
 
 
 class BasicAuth(Auth):
@@ -60,3 +62,29 @@ class BasicAuth(Auth):
         # Split the decoded string into email and password based on ':'
         email, password = decoded_base64_authorization_header.split(':', 1)
         return email, password
+
+    def user_object_from_credentials(
+            self, user_email: str, user_pwd: str) -> TypeVar('User'):
+        """returns the User instance based on his email and password
+        """
+        if user_email is None or not isinstance(user_email, str):
+            return None
+
+        if user_pwd is None or not isinstance(user_pwd, str):
+            return None
+
+        # Use the class method to search for users by email
+        user_list = User.search({"email": user_email})
+
+        # Check if there are no users with the given email
+        if not user_list:
+            return None
+
+        # Get the first user found (assuming email is unique)
+        user = user_list[0]
+
+        # Check if the provided password is valid for the user
+        if not user.is_valid_password(user_pwd):
+            return None
+
+        return user
