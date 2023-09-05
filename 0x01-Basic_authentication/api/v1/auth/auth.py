@@ -17,7 +17,21 @@ class Auth:
         '''Get the authorization header from the Flask request.
         :param request: The Flask request object.
         :return: The authorization header or None if not found.'''
-        return False
+        if path is None or not excluded_paths:
+            return True
+
+        # Ensure that excluded_paths are slash-tolerant
+        if not path.endswith('/'):
+            path += '/'
+
+        # Check if path is in excluded_paths (slash-tolerant)
+        for excluded_path in excluded_paths:
+            if excluded_path.endswith('/'):
+                excluded_path = excluded_path[:-1]
+            if path.startswith(excluded_path):
+                return False
+
+        return True
 
     def authorization_header(self, request=None) -> str:
         '''Get the authorization header from the Flask request.
