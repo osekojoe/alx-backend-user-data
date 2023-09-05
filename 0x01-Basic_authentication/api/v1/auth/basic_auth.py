@@ -98,3 +98,15 @@ class BasicAuth(Auth):
         decoded = self.decode_base64_authorization_header(b64header)
         user_creds = self.extract_user_credentials(decoded)
         return self.user_object_from_credentials(*user_creds)
+
+    def extract_user_credentials(
+            self, decoded_base64_authorization_header: str) -> (str, str):
+        """
+        returns the user email and password from the Base64 decoded value.
+        """
+        if (decoded_base64_authorization_header and isinstance(
+             decoded_base64_authorization_header, str) and
+                ":" in decoded_base64_authorization_header):
+            response = decoded_base64_authorization_header.split(":", 1)
+            return (response[0], response[1])
+        return (None, None)
