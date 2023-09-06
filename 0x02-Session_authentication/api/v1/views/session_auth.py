@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
+"""Module of session authenticating views.
 """
-handles all routes for the Session authentication
-"""
-
-
 import os
 from typing import Tuple
 from flask import abort, jsonify, request
@@ -14,38 +11,27 @@ from api.v1.views import app_views
 
 @app_views.route('/auth_session/login', methods=['POST'], strict_slashes=False)
 def login() -> Tuple[str, int]:
-    # Retrieve email and password parameters using request.form.get()
+    """POST /api/v1/auth_session/login
+    Return:
+      - JSON representation of a User object.
+    """
+    not_found_res = {"error": "no user found for this email"}
     email = request.form.get('email')
-    password = request.form.get('password')
-
-    # Check for missing email or password
-    if not email:
+    if email is None or len(email.strip()) == 0:
         return jsonify({"error": "email missing"}), 400
-    if not password:
+    password = request.form.get('password')
+    if password is None or len(password.strip()) == 0:
         return jsonify({"error": "password missing"}), 400
-
-    # Retrieve the User instance based on the email
-    user = User.search({'email': email})
-
-    # If no User found, return a 404 error
-    if not user:
-        return jsonify({"error": "no user found for this email"}), 404
-
-    # If the password is not valid, return a 401 error
-    if not user.is_valid_password(password):
-        return jsonify({"error": "wrong password"}), 401
-
-    # Create a Session ID for the User ID
-    session_id = auth.create_session(user.id)
-
-    # Return the dictionary representation of the User
-    user_dict = user.to_json()
-
-    # Create a response with the User dictionary
-    response = jsonify(user_dict)
-
-    # Set the cookie with the Session ID
-    session_cookie_name = os.getenv("SESSION_NAME", "_my_session_id")
-    response.set_cookie(session_cookie_name, session_id)
-
-    return response, 200
+    try:
+        users = User.search({'email': email})
+    except Exception:
+        return jsonify(not_found_res), 404
+    if len(users) <= 0:
+        return jsonify(not_found_res), 404
+    if users[0].is_valid_password(password):
+        from api.v1.app import auth
+        sessiond_id = auth.create_session(getattr(users[0], 'id'))
+        res = jsonify(users[0].to_json())
+        res.set_cookie(os.getenv("SESSION_NAME"), sessiond_id)
+        return res
+    return jsonify({"error": "wrong password"}), 401
