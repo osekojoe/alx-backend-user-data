@@ -19,17 +19,21 @@ class Auth:
         Check if authentication is required for a given path.
 
         :param path: The path to check for authentication.
-        :param excluded_paths: List of paths that are excluded from authentication checks.
+        :param excluded_paths: List of paths that are excluded from
+          authentication checks.
         :return: True if authentication is required, False otherwise.
         """
-        if path is None or not excluded_paths:
-            return True
-
-        # Check if path is in excluded_paths using fnmatch
-        for pattern in excluded_paths:
-            if fnmatch.fnmatch(path, pattern):
-                return False
-
+        if path is not None and excluded_paths is not None:
+            for exclusion_path in map(lambda x: x.strip(), excluded_paths):
+                pattern = ''
+                if exclusion_path[-1] == '*':
+                    pattern = '{}.*'.format(exclusion_path[0:-1])
+                elif exclusion_path[-1] == '/':
+                    pattern = '{}/*'.format(exclusion_path[0:-1])
+                else:
+                    pattern = '{}/*'.format(exclusion_path)
+                if re.match(pattern, path):
+                    return False
         return True
 
     def authorization_header(self, request=None) -> str:
