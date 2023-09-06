@@ -35,7 +35,8 @@ class SessionAuth(Auth):
         Get a User ID based on a Session ID.
 
         :param session_id: The Session ID.
-        :return: The User ID associated with the Session ID, or None if session_id is not valid or not found.
+        :return: The User ID associated with the Session ID, or None
+          if session_id is not valid or not found.
         """
         if session_id is None or not isinstance(session_id, str):
             return None
