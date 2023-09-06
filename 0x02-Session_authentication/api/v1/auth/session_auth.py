@@ -6,6 +6,7 @@ Session authentication module for the API.
 
 from .auth import Auth
 import uuid
+from models.user import User
 
 
 class SessionAuth(Auth):
@@ -43,3 +44,30 @@ class SessionAuth(Auth):
 
         # Use .get() to access the User ID based on the Session ID
         return self.user_id_by_session_id.get(session_id)
+
+    def current_user(self, request=None):
+        """
+        Get the User instance based on a session cookie value.
+
+        :param request: The Flask request object.
+        :return: The User instance associated with the session cookie, or None if not found.
+        """
+        if request is None:
+            return None
+
+        # Get the session cookie value using self.session_cookie()
+        session_cookie_value = self.session_cookie(request)
+
+        if session_cookie_value is None:
+            return None
+
+        # Use self.user_id_for_session_id() to get the User ID based on the session cookie
+        user_id = self.user_id_for_session_id(session_cookie_value)
+
+        if user_id is None:
+            return None
+
+        # Use User.get() to retrieve the User instance from the database based on the User ID
+        user = User.get(user_id)
+
+        return user
