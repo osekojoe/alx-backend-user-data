@@ -5,6 +5,7 @@ Authentication handler
 
 
 import os
+import re
 from typing import List, TypeVar
 from flask import request
 import fnmatch
