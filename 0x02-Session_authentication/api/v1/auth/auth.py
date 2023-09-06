@@ -4,6 +4,7 @@ Authentication handler
 """
 
 
+import os
 from typing import List, TypeVar
 from flask import request
 import fnmatch
@@ -19,7 +20,8 @@ class Auth:
         Check if authentication is required for a given path.
 
         :param path: The path to check for authentication.
-        :param excluded_paths: List of paths that are excluded from authentication checks.
+        :param excluded_paths: List of paths that are excluded from
+          authentication checks.
         :return: True if authentication is required, False otherwise.
         """
         if path is None or not excluded_paths:
@@ -54,3 +56,19 @@ class Auth:
         '''
         if request is None:
             return None
+
+    def session_cookie(self, request=None):
+        """
+        Get the value of the session cookie from a request.
+
+        :param request: The Flask request object.
+        :return: The value of the session cookie or None if
+          request is None or the cookie is not found.
+        """
+        if request is None:
+            return None
+
+        session_cookie_name = os.getenv("SESSION_NAME", "_my_session_id")
+
+        # Use .get() to access the cookie in the request cookies dictionary
+        return request.cookies.get(session_cookie_name)
