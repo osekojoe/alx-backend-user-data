@@ -67,15 +67,15 @@ class Auth:
         """takes an email string argument and returns the
         session ID as a string.
         """
-        user = self._db.find_user_by_email(email)
+        try:
+            user = self._db.find_user_by(email=email)
+        except NoResultFound:
+            return None
 
-        if user:
-            # Generate a new UUID using your _generate_uuid function
-            session_id = self._generate_uuid()
+        # Generate a new UUID using your _generate_uuid function
+        session_id = _generate_uuid()
 
-            # Store the session_id in the database for the user
-            self._db.set_user_session_id(user.id, session_id)
+        # Store the session_id in the database for the user
+        self._db.update_user(user.id, session_id=session_id)
 
-            return session_id
-
-        return None  # if the user does not exist
+        return session_id
