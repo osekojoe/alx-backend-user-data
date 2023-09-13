@@ -20,7 +20,7 @@ def _hash_password(password: str) -> bytes:
     return hashed_password
 
 
-def _generate_uuid():
+def _generate_uuid() -> str:
     """
     Generate a new UUID and return it as a string.
     This function is private to the auth module.
