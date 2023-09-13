@@ -8,6 +8,7 @@ import bcrypt
 from sqlalchemy.orm.exc import NoResultFound
 
 from db import DB
+from user import User
 
 
 def _hash_password(password: str) -> bytes:
@@ -32,4 +33,5 @@ class Auth:
             self._db.find_user_by(email=email)
         except NoResultFound:
             return self._db.add_user(email, _hash_password(password))
-        raise ValueError("User {} already exists".format(email))
+        else:
+            raise ValueError("User {} already exists".format(email))
