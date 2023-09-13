@@ -48,8 +48,7 @@ class Auth:
             # Check if the provided password matches the hashed password
             hashed_password = user.hashed_password
             provided_password = password.encode()
-            
+
             if bcrypt.checkpw(provided_password, hashed_password):
                 return True
-
-        return False
+            return False
