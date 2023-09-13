@@ -4,7 +4,7 @@ Flask app
 """
 
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response, abort
 
 from auth import Auth
 
@@ -41,6 +41,30 @@ def register_user():
 
     except Exception as e:
         return jsonify({"message": str(e)}), 500
+
+
+@app.route('/sessions', methods=['POST'])
+def login() -> str:
+    """logs in a user"""
+    email = request.form.get('email')
+    password = request.form.get('password')
+
+    if not email or not password:
+        abort(400, "Both 'email' and 'password' fields are required")
+
+    if AUTH.valid_login(email, password):
+        # If the login is correct, create a new session
+        session_id = AUTH.create_session(email)
+
+        if session_id:
+            # Store the session ID as a cookie
+            response = make_response(
+                jsonify({"email": email, "message": "logged in"}), 200)
+            response.set_cookie('session_id', session_id)
+            return response
+
+    # If the login is incorrect or if any other error occurs
+    abort(401, "Authentication failed")
 
 
 if __name__ == "__main__":
