@@ -5,6 +5,7 @@ Hashing input passwords
 
 
 import bcrypt
+import uuid
 from sqlalchemy.orm.exc import NoResultFound
 
 from db import DB
@@ -17,6 +18,15 @@ def _hash_password(password: str) -> bytes:
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
 
     return hashed_password
+
+
+def _generate_uuid():
+    """
+    Generate a new UUID and return it as a string.
+    This function is private to the auth module.
+    """
+    new_uuid = uuid.uuid4()
+    return str(new_uuid)
 
 
 class Auth:
